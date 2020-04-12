@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -38,8 +40,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget firstBody() {
-    Widget retObj =
-        Center(child: Text('This is Page ' + _currentPage.toString()));
+    var randomEmojis = ["🐜","🤗","🎨","🍒","🏆","🏈","💺","👢","✒️","🎽","📚","✂️","🐻","🐴","🐫","🚄","😄","😜","🐄","🐵","🌻","👀"];
+
+    Widget retObj = new FractionallySizedBox(
+      child: new Container(
+          margin: const EdgeInsets.only(right: 10, left: 10,top:10),
+          child: new TextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 25,
+            decoration: new InputDecoration(
+              hintText: 'Write your story here '+ randomEmojis[Random().nextInt(randomEmojis.length)] +'...',
+              fillColor: Colors.grey[900],
+              filled: true,
+            ),
+          )),
+      widthFactor: 1.00,
+      heightFactor: 0.70,
+    );
+  
 
     return retObj;
   }
