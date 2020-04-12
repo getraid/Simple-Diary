@@ -10,10 +10,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: appTitle,
       theme: ThemeData(
-         brightness: Brightness.dark,
-    primaryColor: Colors.grey[700],
-    accentColor: Colors.yellowAccent,),
-      home: MyHomePage(title: appTitle, currentPage: 1),
+        brightness: Brightness.dark,
+        primaryColor: Colors.grey[700],
+        accentColor: Colors.yellowAccent,
+      ),
+      home: MyHomePage(title: appTitle, currentPage: 0),
     );
   }
 }
@@ -37,7 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget firstBody() {
-    Widget retObj = Center(child: Text('This is Page ' + _currentPage.toString()));
+    Widget retObj =
+        Center(child: Text('This is Page ' + _currentPage.toString()));
 
     return retObj;
   }
@@ -52,10 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget decideBody(index) {
     switch (index) {
-      case 1:
+      case 0:
         return firstBody();
         break;
-      case 2:
+      case 1:
         return secondBody();
         break;
       default:
@@ -65,46 +67,79 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    DrawerHeader sideBarHeader = new DrawerHeader(
+        child: Text('Simple Diary App'),
+        decoration: BoxDecoration(
+            color: Colors.grey[700],
+            //remove 'null)' and uncomment below; current image is a placeholder
+            image: null)
+        //new DecorationImage(
+        //   // image: Image.network(
+        //   //   'https://i.picsum.photos/id/270/400/200.jpg',
+        //   // ).image,
+        //   // fit: BoxFit.cover, )
+        //   ),
+        );
+
+    //
+    List<Widget> sideBarEntrys() {
+      List entrys = new List();
+      entrys.add('Read/Write');
+      entrys.add('Pick date');
+
+      List<Widget> temp = new List();
+      temp.add(sideBarHeader);
+      for (var i = 0; i < entrys.length; i++) {
+        temp.add(ListTile(
+            title: Text(entrys[i]),
+            onTap: () {
+              Navigator.of(context).pop();
+              setState(() {
+                _currentPage = i;
+              });
+            }));
+      }
+      temp.add(Divider());
+      temp.add(ListTile(
+          title: Text("About Page"),
+          onTap: () {
+            Navigator.of(context).pop();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AboutPage()),
+            );
+          }));
+
+      return temp;
+    }
+
     return new Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: decideBody(_currentPage),
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-                child: Text('Simple Diary App'),
-                decoration: BoxDecoration(
-                    color: Colors.grey[700],
-                    //remove 'null)' and uncomment below; current image is a placeholder
-                    image: null)
-                //new DecorationImage(
-                //   // image: Image.network(
-                //   //   'https://i.picsum.photos/id/270/400/200.jpg',
-                //   // ).image,
-                //   // fit: BoxFit.cover, )
-                //   ),
-                ),
-            ListTile(
-              title: Text('Read/Write'),
-              onTap: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  _currentPage = 1;
-                });
-              },
-            ),
-            ListTile(
-              title: Text('Pick date'),
-              onTap: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  _currentPage = 2;
-                });
-              },
-            ),
-          ],
+        appBar: AppBar(title: Text(widget.title)),
+        body: decideBody(_currentPage),
+        drawer: new Drawer(
+          child: ListView(
+            // Important: Remove any padding from the ListView.
+            padding: EdgeInsets.zero,
+            children: sideBarEntrys(),
+          ),
+        ));
+  }
+}
+
+class AboutPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("About"),
+      ),
+      body: Center(
+        child: RaisedButton(
+          onPressed: () {
+            // Navigate back to first route when tapped.
+          },
+          child: Text('Go back!'),
         ),
       ),
     );
