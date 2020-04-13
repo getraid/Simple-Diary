@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel, WeekdayFormat;
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -252,15 +254,42 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  loadJson() async {
-    String data = await rootBundle.loadString('assets/data.json');
-    List<Product> products = new List<Product>();
-    List jsonParsed = json.decode(data.toString());
-    for (int i = 0; i < jsonParsed.length; i++) {
-      products.add(new Product.fromJson(jsonParsed[i]));
+  createNewFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/data.json');
+    final text = '[{"date":"' +
+        DateTime.now().toString().split(' ')[0] +
+        '","text":""}]';
+    await file.writeAsString(text);
+    print('saved');
+  }
+
+  _read() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/data.json');
+      String text = await file.readAsString();
+      print(text);
+    } catch (e) {
+      print("Couldn't read file");
     }
-    print(products[1].text);
-    print(products[1].date);
+  }
+
+  loadJson() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      String data = await File('${directory.path}/data.json').readAsString();
+      List<Product> products = new List<Product>();
+      List jsonParsed = json.decode(data.toString());
+      for (int i = 0; i < jsonParsed.length; i++) {
+        products.add(new Product.fromJson(jsonParsed[i]));b
+      }
+      print(products[0].text);
+      print(products[0].date);
+    } catch (e) {
+      print(e.toString() + "\nwill try to create new file");
+      await createNewFile();
+    }
   }
 }
 
