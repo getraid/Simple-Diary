@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -32,40 +31,65 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController editor;
   // String _title;
   int _currentPage;
+  DateTime _selectedDate = new DateTime(new DateTime.now().year,
+      new DateTime.now().month, new DateTime.now().day);
+
   _MyHomePageState(title, currentPage) {
     //  _title = title;
     _currentPage = currentPage;
+    editor = new TextEditingController(text: "d");
   }
 
   Widget firstBody() {
-    var randomEmojis = ["🐜","🤗","🎨","🍒","🏆","🏈","💺","👢","✒️","🎽","📚","✂️","🐻","🐴","🐫","🚄","😄","😜","🐄","🐵","🌻","👀"];
+    //because of formating
+    var randomEmojisRaw =
+        "🐜 🤗 🎨 🍒 🏆 🏈 💺 👢 ✒️ 🎽 👰 📚 ✂️ 🐻 🐴 🐫 🚄 😄 😜 🐄 🐵 🌻";
+    var randomEmojis = randomEmojisRaw.split(' ');
 
-    Widget retObj = new FractionallySizedBox(
-      child: new Container(
-          margin: const EdgeInsets.only(right: 10, left: 10,top:10),
-          child: new TextField(
-            keyboardType: TextInputType.multiline,
-            maxLines: 25,
-            decoration: new InputDecoration(
-              hintText: 'Write your story here '+ randomEmojis[Random().nextInt(randomEmojis.length)] +'...',
-              fillColor: Colors.grey[900],
-              filled: true,
-            ),
-          )),
-      widthFactor: 1.00,
-      heightFactor: 0.70,
-    );
-  
+    Widget retObj = new Column(children: <Widget>[
+      new Center(
+          child: new Padding(
+              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+              child: new Text("Picked date: " +
+                  _selectedDate
+                      .toString()
+                      .split(' ')[0]
+                      .replaceAll('-', '/')))),
+      new Expanded(
+          child: Container(
+        margin: const EdgeInsets.only(right: 10, left: 10, top: 10),
+        child: (new TextField(
+          controller: editor,
+          keyboardType: TextInputType.multiline,
+          maxLines: 20,
+          decoration: new InputDecoration(
+            hintText: 'Write your story here ' +
+                randomEmojis[Random().nextInt(randomEmojis.length)] +
+                '...',
+            fillColor: Colors.grey[900],
+            filled: true,
+          ),
+        )),
+      ))
+    ]);
 
     return retObj;
   }
 
   Widget secondBody() {
     Widget retObj = Align(
-        alignment: Alignment.centerRight,
-        child: Text('You are on Page ' + _currentPage.toString()));
+        alignment: Alignment.center,
+        child: ListView(children: <Widget>[
+          new RaisedButton(
+              onPressed: () {
+                _selectedDate = new DateTime(2019, 01, 01);
+              },
+              child: Text('Change!')),
+          RichText(text: TextSpan(text: editor.text))
+        ]));
 
     return retObj;
   }
