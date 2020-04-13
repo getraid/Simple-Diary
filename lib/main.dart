@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/services.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
@@ -44,6 +47,21 @@ class _MyHomePageState extends State<MyHomePage> {
     //  _title = title;
     _currentPage = currentPage;
     editor = new TextEditingController(text: "");
+    //read file here
+
+    KeyboardVisibilityNotification().addNewListener(onChange: (bool visible) {
+      //save file into json here
+      if (editor.text != "") {
+        print(editor.text);
+      }
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await loadJson();
+    });
   }
 
   Widget firstBody() {
@@ -65,6 +83,10 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Container(
         margin: const EdgeInsets.only(right: 10, left: 10, top: 10),
         child: (new TextField(
+          // alternative saving method
+          // onChanged: (text) =>{
+          // save after each char update here
+          // },
           controller: editor,
           keyboardType: TextInputType.multiline,
           maxLines: 28,
@@ -124,8 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   return null;
                 }
               },
-              todayTextStyle:
-                  new TextStyle(color: Colors.lightBlue),
+              minSelectedDate: new DateTime(1970),
+              todayTextStyle: new TextStyle(color: Colors.lightBlue),
               todayBorderColor: Colors.lightBlue,
               todayButtonColor: Colors.transparent,
               selectedDayButtonColor: Color.fromRGBO(10, 10, 10, 0.4),
@@ -145,9 +167,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           new RaisedButton(
               onPressed: () {
-                _selectedDate = new DateTime(2019, 01, 01);
+                setState(() {
+                  _currentPage = 0;
+                });
               },
-              child: Text('Change!')),
+              child: Text('Edit / Add entry')),
           RichText(text: TextSpan(text: editor.text))
         ]));
 
@@ -226,6 +250,29 @@ class _MyHomePageState extends State<MyHomePage> {
             children: sideBarEntrys(),
           ),
         ));
+  }
+
+  loadJson() async {
+    String data = await rootBundle.loadString('assets/data.json');
+    List<Product> products = new List<Product>();
+    List jsonParsed = json.decode(data.toString());
+    for (int i = 0; i < jsonParsed.length; i++) {
+      products.add(new Product.fromJson(jsonParsed[i]));
+    }
+    print(products[1].text);
+    print(products[1].date);
+  }
+}
+
+class Product {
+  final String date;
+  final String text;
+
+  Product({this.date, this.text});
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return new Product(
+        date: json['date'] as String, text: json['text'] as String);
   }
 }
 
