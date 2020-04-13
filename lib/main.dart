@@ -282,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
       List<Product> products = new List<Product>();
       List jsonParsed = json.decode(data.toString());
       for (int i = 0; i < jsonParsed.length; i++) {
-        products.add(new Product.fromJson(jsonParsed[i]));b
+        products.add(new Product.fromJson(jsonParsed[i]));
       }
       print(products[0].text);
       print(products[0].date);
