@@ -61,9 +61,11 @@ class _MyHomePageState extends State<MyHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       List<TxtClass> userD = await _loadJson(false);
       this.userData = userD;
+      editor.text = '';
       for (var i = 0; i < userD.length; i++) {
-        if (userD[i].date == _selectedDate.toString().split(' ')[0])
+        if (userD[i].date == _selectedDate.toString().split(' ')[0]) {
           editor.text = userD[i].text;
+        }
       }
     });
 
@@ -295,10 +297,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     String text = '[';
     for (var i = 0; i < data.length; i++) {
-    
       String seperator = (i == data.length - 1) ? '}' : '},';
-      text +=
-          '{"date":"' + data[i].date + '","text":"' + data[i].text +'"'+ seperator;
+      text += '{"date":"' +
+          data[i].date +
+          '","text":"' +
+          data[i].text +
+          '"' +
+          seperator;
     }
     text += ']';
     await file.writeAsString(text);
@@ -313,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
       List jsonParsed = json.decode(data.toString());
       for (int i = 0; i < jsonParsed.length; i++) {
         txtobj.add(new TxtClass.fromJson(jsonParsed[i]));
-        print(txtobj[i].date+" "+txtobj[i].text);
+        print(txtobj[i].date + " " + txtobj[i].text);
       }
 
       return txtobj;
