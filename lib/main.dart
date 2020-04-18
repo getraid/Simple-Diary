@@ -19,12 +19,10 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       title: appTitle,
       theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.grey[700],
-        accentColor: Colors.yellowAccent,
-        primaryColorBrightness: Brightness.dark
-        
-      ),
+          brightness: Brightness.dark,
+          primaryColor: Colors.grey[700],
+          accentColor: Colors.yellowAccent,
+          primaryColorBrightness: Brightness.dark),
       home: MyHomePage(title: appTitle, currentPage: 0),
     );
   }
@@ -44,13 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController editor;
   List<TxtClass> userData;
 
-  // String _title;
   int _currentPage;
   DateTime _selectedDate = new DateTime(new DateTime.now().year,
       new DateTime.now().month, new DateTime.now().day);
 
   _MyHomePageState(title, currentPage) {
-    //  _title = title;
     _currentPage = currentPage;
     editor = new TextEditingController(text: "");
   }
@@ -106,22 +102,29 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Theme.of(context).accentColor,
           textColor: Colors.black,
           onPressed: () {
-            //search if exists in date, then save, else append
+            //search if date exists, then save, else append; When no text value found, remove entry.
             for (var i = 0; i < this.userData.length; i++) {
               if (this.userData[i].date ==
                   _selectedDate.toString().split(' ')[0]) {
-                this.userData[i].text = editor.text;
-                _save();
-                return;
+                if (editor.text.isNotEmpty) {
+                  this.userData[i].text = editor.text;
+                  _saveJson();
+                  return;
+                } else {
+                  this.userData.removeAt(i);
+                  _saveJson();
+                  return;
+                }
               }
             }
+            if (editor.text.isNotEmpty) {
+              TxtClass temp = new TxtClass();
+              temp.date = _selectedDate.toString().split(' ')[0];
+              temp.text = editor.text;
+              this.userData.add(temp);
 
-            TxtClass temp = new TxtClass();
-            temp.date = _selectedDate.toString().split(' ')[0];
-            temp.text = editor.text;
-            this.userData.add(temp);
-
-            _save();
+              _saveJson();
+            }
           },
           child: Text('Save entry'),
         ),
@@ -153,11 +156,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 bool isThisMonthDay,
                 DateTime day,
               ) {
-                /// If you return null, [CalendarCarousel] will build container for current [day] with default function.
-                /// This way you can build custom containers for specific days only, leaving rest as default.
-
-                // Example: every 15th of month, we have a flight, we can place an icon in the container like that:
-                if (day.day == 13) {
+                //should've used more Iterables in other methods as well... ¯\_(ツ)_/¯
+                if (this
+                    .userData
+                    .where((i) => i.date == day.toString().split(' ')[0])
+                    .isNotEmpty) {
                   return Center(
                       child: ListView(
                     children: <Widget>[
@@ -169,8 +172,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       Center(child: Text(day.day.toString()))
                     ],
                   ));
-                } else {
-                  return null;
                 }
               },
               minSelectedDate: new DateTime(1970),
@@ -199,7 +200,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               },
               child: Text('Edit / Add entry')),
-          RichText(text: TextSpan(text: editor.text))
         ]));
 
     return retObj;
@@ -234,7 +234,6 @@ class _MyHomePageState extends State<MyHomePage> {
         //   ),
         );
 
-    //
     List<Widget> sideBarEntrys() {
       List entrys = new List();
       entrys.add('Read/Write');
@@ -279,25 +278,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  _createNewFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/data.json');
-    final text =
-        '[{"date":"' + _selectedDate.toString().split(' ')[0] + '","text":""}]';
-    await file.writeAsString(text);
-    print('saved');
-  }
-
-  _save() async {
+  _saveJson() async {
     List<TxtClass> data = this.userData;
 
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/data.json');
-
-    // final text = '[{"date":"' +
-    //     DateTime.now().toString().split(' ')[0] +
-    //     '","text":"x"}]';
-
     String text = '[';
     for (var i = 0; i < data.length; i++) {
       String seperator = (i == data.length - 1) ? '}' : '},';
@@ -327,7 +312,8 @@ class _MyHomePageState extends State<MyHomePage> {
       return txtobj;
     } catch (e) {
       print(e.toString() + "\nwill try to create new file");
-      await _createNewFile();
+      this.userData = new List<TxtClass>();
+      await _saveJson();
       return (!retry) ? _loadJson(true) : null;
     }
   }
