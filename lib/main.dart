@@ -297,7 +297,6 @@ class _MyHomePageState extends State<MyHomePage> {
       List jsonParsed = json.decode(data.toString());
       for (int i = 0; i < jsonParsed.length; i++) {
         txtobj.add(new TxtClass.fromJson(jsonParsed[i]));
-        
       }
 
       return txtobj;
@@ -320,28 +319,30 @@ class TxtClass {
     return new TxtClass(
         date: json['date'] as String, text: json['text'] as String);
   }
-   Map<String, dynamic> toJson() => {
-    "date": this.date,
-    "text": this.text
-  };
-
+  Map<String, dynamic> toJson() => {"date": this.date, "text": this.text};
 }
 
 class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("About"),
-      ),
-      body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            // Navigate back to first route when tapped.
-          },
-          child: Text('Go back!'),
+        appBar: AppBar(
+          title: Text("About"),
         ),
-      ),
-    );
+        body: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          new Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(
+                "Programmed by © getraid 2020\ngit.getraid.com\n\nMade with Flutter\n\nDependecies:\nflutter_calendar_carousel: MIT\npath_provider: BSD\n\nLicense: MIT"),
+
+            // Center(
+            //     child: RaisedButton(
+            //   onPressed: () {
+
+            //   },
+            //   child: Text('Export JSON'),
+            // )
+            // )
+          ])
+        ]));
   }
 }
