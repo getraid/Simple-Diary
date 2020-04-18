@@ -172,7 +172,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       Center(child: Text(day.day.toString()))
                     ],
                   ));
-                }
+                } else
+                  return null;
               },
               minSelectedDate: new DateTime(1970),
               todayTextStyle: new TextStyle(color: Colors.lightBlue),
