@@ -13,7 +13,7 @@ This is just a simple diary app (or at least that is what I was aiming for)
 The code is messy because I just hacked it together, without looking into the docs as much. So don't blame me (please...)  
 
 ## Why a diary?  
-no reason, really. I just needed a sample project 👀
+no reason, really. I just needed a test project 👀
 
 # Setup
 
