@@ -10,7 +10,7 @@ Nothing special, just wondered myself how flutter worked and wanted to try it ðŸ
 ## What is this  
 
 This is just a simple diary app (or at least that is what I was aiming for)    
-Pictures n' stuff will come at a later point.  
+The code is messy because I just hacked it together, without looking into the docs as much. So don't blame me (please...)  
 
 ## Why a diary?  
 no reason, really. I just needed a sample project ðŸ‘€
