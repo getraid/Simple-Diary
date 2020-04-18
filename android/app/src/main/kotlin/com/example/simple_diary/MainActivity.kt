@@ -1,4 +1,4 @@
-package com.example.simple_diary
+package com.getraid.simple_diary
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

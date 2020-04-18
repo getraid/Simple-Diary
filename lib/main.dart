@@ -284,17 +284,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/data.json');
-    String text = '[';
-    for (var i = 0; i < data.length; i++) {
-      String seperator = (i == data.length - 1) ? '}' : '},';
-      text += '{"date":"' +
-          data[i].date +
-          '","text":"' +
-          data[i].text +
-          '"' +
-          seperator;
-    }
-    text += ']';
+    String text = jsonEncode(data);
     await file.writeAsString(text);
     print('saved');
   }
@@ -307,7 +297,7 @@ class _MyHomePageState extends State<MyHomePage> {
       List jsonParsed = json.decode(data.toString());
       for (int i = 0; i < jsonParsed.length; i++) {
         txtobj.add(new TxtClass.fromJson(jsonParsed[i]));
-        print(txtobj[i].date + " " + txtobj[i].text);
+        
       }
 
       return txtobj;
@@ -330,6 +320,11 @@ class TxtClass {
     return new TxtClass(
         date: json['date'] as String, text: json['text'] as String);
   }
+   Map<String, dynamic> toJson() => {
+    "date": this.date,
+    "text": this.text
+  };
+
 }
 
 class AboutPage extends StatelessWidget {
