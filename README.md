@@ -3,6 +3,10 @@
 A new Flutter project, to learn about app development.  
 Nothing special, just wondered myself how flutter worked and wanted to try it 😊  
 
+## Screenshots
+![img](docs/img.png)
+![img](docs/img2.png)
+
 ## What is this  
 
 This is just a simple diary app (or at least that is what I was aiming for)    
