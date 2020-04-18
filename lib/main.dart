@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/services.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
@@ -40,6 +39,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController editor;
+  List<TxtClass> userData;
+
   // String _title;
   int _currentPage;
   DateTime _selectedDate = new DateTime(new DateTime.now().year,
@@ -49,21 +50,6 @@ class _MyHomePageState extends State<MyHomePage> {
     //  _title = title;
     _currentPage = currentPage;
     editor = new TextEditingController(text: "");
-    //read file here
-
-    KeyboardVisibilityNotification().addNewListener(onChange: (bool visible) {
-      //save file into json here
-      if (editor.text != "") {
-        print(editor.text);
-      }
-    });
-  }
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await loadJson();
-    });
   }
 
   Widget firstBody() {
@@ -71,6 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
     var randomEmojisRaw =
         "🐜 🤗 🎨 🍒 🏆 🏈 💺 👢 ✒️ 🎽 👰 📚 ✂️ 🐻 🐴 🐫 🚄 😄 😜 🐄 🐵 🌻";
     var randomEmojis = randomEmojisRaw.split(' ');
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      List<TxtClass> userD = await _loadJson(false);
+      this.userData = userD;
+      for (var i = 0; i < userD.length; i++) {
+        if (userD[i].date == _selectedDate.toString().split(' ')[0])
+          editor.text = userD[i].text;
+      }
+    });
 
     Widget retObj = new Column(children: <Widget>[
       new Center(
@@ -91,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // },
           controller: editor,
           keyboardType: TextInputType.multiline,
-          maxLines: 28,
+          maxLines: 25,
           decoration: new InputDecoration(
             hintText: 'Write your story here ' +
                 randomEmojis[Random().nextInt(randomEmojis.length)] +
@@ -100,7 +95,32 @@ class _MyHomePageState extends State<MyHomePage> {
             filled: true,
           ),
         )),
-      ))
+      )),
+      Center(
+        child: RaisedButton(
+          color: Theme.of(context).accentColor,
+          textColor: Colors.black,
+          onPressed: () {
+            //search if exists in date, then save, else append
+            for (var i = 0; i < this.userData.length; i++) {
+              if (this.userData[i].date ==
+                  _selectedDate.toString().split(' ')[0]) {
+                this.userData[i].text = editor.text;
+                _save();
+                return;
+              }
+            }
+
+            TxtClass temp = new TxtClass();
+            temp.date = _selectedDate.toString().split(' ')[0];
+            temp.text = editor.text;
+            this.userData.add(temp);
+
+            _save();
+          },
+          child: Text('Save entry'),
+        ),
+      ),
     ]);
 
     return retObj;
@@ -254,53 +274,65 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  createNewFile() async {
+  _createNewFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/data.json');
-    final text = '[{"date":"' +
-        DateTime.now().toString().split(' ')[0] +
-        '","text":""}]';
+    final text =
+        '[{"date":"' + _selectedDate.toString().split(' ')[0] + '","text":""}]';
     await file.writeAsString(text);
     print('saved');
   }
 
-  _read() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/data.json');
-      String text = await file.readAsString();
-      print(text);
-    } catch (e) {
-      print("Couldn't read file");
+  _save() async {
+    List<TxtClass> data = this.userData;
+
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/data.json');
+
+    // final text = '[{"date":"' +
+    //     DateTime.now().toString().split(' ')[0] +
+    //     '","text":"x"}]';
+
+    String text = '[';
+    for (var i = 0; i < data.length; i++) {
+    
+      String seperator = (i == data.length - 1) ? '}' : '},';
+      text +=
+          '{"date":"' + data[i].date + '","text":"' + data[i].text +'"'+ seperator;
     }
+    text += ']';
+    await file.writeAsString(text);
+    print('saved');
   }
 
-  loadJson() async {
+  Future<List<TxtClass>> _loadJson(bool retry) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       String data = await File('${directory.path}/data.json').readAsString();
-      List<Product> products = new List<Product>();
+      var txtobj = new List<TxtClass>();
       List jsonParsed = json.decode(data.toString());
       for (int i = 0; i < jsonParsed.length; i++) {
-        products.add(new Product.fromJson(jsonParsed[i]));
+        txtobj.add(new TxtClass.fromJson(jsonParsed[i]));
+        print(txtobj[i].date+" "+txtobj[i].text);
       }
-      print(products[0].text);
-      print(products[0].date);
+
+      return txtobj;
     } catch (e) {
       print(e.toString() + "\nwill try to create new file");
-      await createNewFile();
+      await _createNewFile();
+      return (!retry) ? _loadJson(true) : null;
     }
   }
 }
 
-class Product {
-  final String date;
-  final String text;
+class TxtClass {
+  String date;
+  String text;
 
-  Product({this.date, this.text});
+  TxtClass({this.date, this.text});
 
-  factory Product.fromJson(Map<String, dynamic> json) {
-    return new Product(
+  factory TxtClass.fromJson(Map<String, dynamic> json) {
+    return new TxtClass(
         date: json['date'] as String, text: json['text'] as String);
   }
 }
